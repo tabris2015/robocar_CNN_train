@@ -120,11 +120,8 @@ class RobocarTrainer(object):
 
     def SaveModel(self):
         # serialize model to JSON
-        self.model_json = self.model.to_json()
-        with open(self.model_name + '.json', "w") as json_file:
-            json_file.write(self.model_json)
-        # serialize weights to HDF5
-        self.model.save_weights(self.model_name + '.h5')
+        filepath= os.path.join(model_path, model_name + '.h5')
+        self.model.save_weights(filepath)
         print("Saved model to disk")
 
 
