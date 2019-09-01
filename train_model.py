@@ -36,7 +36,7 @@ class RobocarTrainer(object):
     im_shape = (224, 224)
 
     # train parameters
-    batch_size = 16
+    # batch_size = 16
  
 
     def __init__(self, model_type='base', 
@@ -45,7 +45,8 @@ class RobocarTrainer(object):
                         dataset_path='dataset', 
                         log_path='trainlogs', 
                         verbose=0, 
-                        n_epochs=10):
+                        n_epochs=10,
+                        batch_size=16):
         self.model_type = model_type
         self.model_name = model_name
         self.model_path = model_path
@@ -53,6 +54,7 @@ class RobocarTrainer(object):
         self.dataset_path = dataset_path
         self.verbose = verbose
         self.n_epochs = n_epochs
+        self.batch_size = batch_size
         # creating callbacks
         self.tfBoardCB = TensorBoard('{}/{}_{}'.format(self.log_path, model_name, time()), write_graph=True)
         filepath= os.path.join(model_path, model_name + '_best.h5')
