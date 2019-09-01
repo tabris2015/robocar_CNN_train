@@ -1,3 +1,5 @@
+import tensorflow as tf
+import tensorflow.keras as keras
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
@@ -110,7 +112,7 @@ def generator_from_df(df, batch_size, target_size, target_column='target', featu
                 Y = sub[target_column].values
                 # Simple model, one input, one output.
                 mini_batches_completed += 1
-                print ".",
+                # print ("."),
                 
                 yield X, Y
 

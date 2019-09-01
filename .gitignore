@@ -107,3 +107,9 @@ venv.bak/
 ## project specific
 trainlogs/
 best_models/
+models/
+# pycharm
+.idea/
+
+# vscode
+.vscode/

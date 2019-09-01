@@ -1,3 +1,5 @@
+import tensorflow as tf
+import tensorflow.keras as keras
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
@@ -35,44 +37,58 @@ class RobocarTrainer(object):
 
     # train parameters
     batch_size = 16
-    n_epochs = 100
+ 
 
-    def __init__(self, model_name, model_path, dataset_path, log_path='trainlogs'):
+    def __init__(self, model_type='base', 
+                        model_name='test', 
+                        model_path='models', 
+                        dataset_path='dataset', 
+                        log_path='trainlogs', 
+                        verbose=0, 
+                        n_epochs=10):
+        self.model_type = model_type
         self.model_name = model_name
         self.model_path = model_path
         self.log_path = log_path
         self.dataset_path = dataset_path
-
+        self.verbose = verbose
+        self.n_epochs = n_epochs
         # creating callbacks
         self.tfBoardCB = TensorBoard('{}/{}_{}'.format(self.log_path, model_name, time()), write_graph=True)
-
-        filepath= model_path + model_name + '_best.h5'
-
+        filepath= os.path.join(model_path, model_name + '_best.h5')
         self.checkpointCB = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+        # load model
+        print('loading model...')
+        print('Using Model Type: {}'.format(self.model_type))
+        self.model = getattr(models, self.model_type)(self.input_shape)
+        if self.verbose > 0:
+            self.model.summary()
 
     
     def LoadDataset(self):
 
-        print('loading dataset...')
-        self.dataset = pd.read_csv(self.dataset_path + 'target.csv')
+        print('loading dataset from: {}'.format(self.dataset_path))
+        if not os.path.isdir(self.dataset_path): 
+            print('[ERROR] No existe la carpeta')
+            return False
+        
+        if not os.path.isfile(os.path.join(self.dataset_path, 'target.csv')):
+            print('[ERROR] No existe el archivo target.csv')
+            return False
 
+        self.dataset = pd.read_csv(os.path.join(self.dataset_path, 'target.csv'))
         self.dataset['imgpath'] = self.dataset.id.apply(file_path_from_db_id, args=("%d.bmp", self.dataset_path))
-
         self.train, self.test = train_test_split(self.dataset, test_size=0.2)
         self.valid, self.test = train_test_split(self.test, test_size=0.7)
-    
         self.train_steps = int(self.train.shape[0] / self.batch_size)
         self.valid_steps = int(self.valid.shape[0] / self.batch_size)
         self.test_steps = int(self.test.shape[0] / self.batch_size)
         print('dataset loaded!')
+        return True
 
     def Train(self):
-
-        print('loading model...')
-        self.model = models.simple1(self.input_shape)
-        self.model.summary()
         model_json = self.model.to_json()
-        with open(self.model_path + self.model_name + '.json', "w") as json_file:
+        with open(os.path.join(self.model_path, self.model_name + '.json'), "w") as json_file:
             json_file.write(model_json)
             
         plot_model(self.model, to_file=self.model_name + '.png', show_shapes=True)
@@ -117,14 +133,20 @@ class RobocarTrainer(object):
 if __name__ == '__main__':
     
     import argparse
-    parser = argparse.ArgumentParser(description='Entrenamiento de una red neuronal convolucional')
-    parser.add_argument("model_name", help="name of the model to train")
-    parser.add_argument("model_path", help="path where the model files will be saved")
-    parser.add_argument("dataset_path", help="path where the the dataset is saved")
+    ap = argparse.ArgumentParser(description='Entrenamiento de una red neuronal convolucional')
+    ap.add_argument("-t", "--type", type=str, default='base', help="type of the model to use")
+    ap.add_argument("-n", "--name", type=str, default='test', help="name of the trained model")
+    ap.add_argument("-p", "--path", type=str, default='models', help="path where the model files will be saved")
+    ap.add_argument("-d", "--dataset", type=str, default='dataset/', help="path where the the dataset is saved")
     
-    args = parser.parse_args()
-    
-    trainer = RobocarTrainer(args.model_name, args.model_path, args.dataset_path)
-    trainer.LoadDataset()
-    trainer.Train()
-    trainer.SaveModel()
+    # ap.add_argument("-i", "--input", type=str,help="path to optional input video file")
+    # ap.add_argument("-c", "--confidence", type=float, default=0.4,help="minimum probability to filter weak detections")
+    # ap.add_argument("-s", "--skip-frames", type=int, default=30,help="# of skip frames between detections")
+    args = vars(ap.parse_args())
+
+    trainer = RobocarTrainer(model_type=args['type'], model_name=args['name'], model_path=args['path'], dataset_path=args['dataset'])
+    if not trainer.LoadDataset():
+        print('No se pudo cargar dataset!')
+    else:
+        trainer.Train()
+        trainer.SaveModel()
