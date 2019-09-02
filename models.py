@@ -151,7 +151,7 @@ def simple2(input_shape):
     angle_out = x
 
     model = Model(inputs=[image_inp], outputs=[angle_out])
-    model.compile(loss=custom_loss, optimizer=tf.train.AdamOptimizer)
+    model.compile(loss=custom_loss, optimizer=tf.train.AdamOptimizer())
 
     return model
 
