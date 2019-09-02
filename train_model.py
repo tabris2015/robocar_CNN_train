@@ -114,6 +114,7 @@ class RobocarTrainer(object):
         print('hiperparameters:')
         print('batch size:{}'.format(self.batch_size))
         
+        start_time = time.time()
         if self.use_generator:
             print('training...')
             self.model.fit_generator(
@@ -146,6 +147,7 @@ class RobocarTrainer(object):
                                 batch_size=self.batch_size,
                                 )
             # pass
+        print('Entrenamiento Finalizado, {} epocas en {0:.2f} [s]'.format(self.n_epochs, time.time() - start_time))
         print('loss: ', self.score)
 
     def SaveModel(self):
