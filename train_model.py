@@ -78,9 +78,10 @@ class RobocarTrainer(object):
         if not os.path.isfile(os.path.join(self.dataset_path, 'target.csv')):
             print('[ERROR] No existe el archivo target.csv')
             return False
-
+        print('leyendo dataframe...')
         self.dataset = pd.read_csv(os.path.join(self.dataset_path, 'target.csv'))
         self.dataset['imgpath'] = self.dataset.id.apply(file_path_from_db_id, args=("%d.bmp", self.dataset_path))
+        print('dividiendo datasets')
         self.train, self.test = train_test_split(self.dataset, test_size=0.2)
         self.valid, self.test = train_test_split(self.test, test_size=0.7)
         self.train_steps = int(self.train.shape[0] / self.batch_size)
