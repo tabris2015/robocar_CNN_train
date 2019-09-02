@@ -46,7 +46,8 @@ class RobocarTrainer(object):
                         log_path='trainlogs', 
                         verbose=0, 
                         n_epochs=10,
-                        batch_size=16):
+                        batch_size=16,
+                        use_generator=True):
         self.model_type = model_type
         self.model_name = model_name
         self.model_path = model_path
@@ -55,6 +56,7 @@ class RobocarTrainer(object):
         self.verbose = verbose
         self.n_epochs = n_epochs
         self.batch_size = batch_size
+        self.use_generator = use_generator
         # creating callbacks
         self.tfBoardCB = TensorBoard('{}/{}_{}'.format(self.log_path, model_name, time()), write_graph=True)
         filepath= os.path.join(model_path, model_name + '_best.h5')
@@ -68,7 +70,6 @@ class RobocarTrainer(object):
 
     
     def LoadDataset(self):
-
         print('loading dataset from: {}'.format(self.dataset_path))
         if not os.path.isdir(self.dataset_path): 
             print('[ERROR] No existe la carpeta')
@@ -85,6 +86,16 @@ class RobocarTrainer(object):
         self.train_steps = int(self.train.shape[0] / self.batch_size)
         self.valid_steps = int(self.valid.shape[0] / self.batch_size)
         self.test_steps = int(self.test.shape[0] / self.batch_size)
+        if not self.use_generator:
+            print('load images to memory')
+            self.X_train, self.Y_train = dataset_from_df(self.train,self.im_shape, 'angular')
+            self.X_valid, self.Y_valid = dataset_from_df(self.valid,self.im_shape, 'angular')
+            self.X_test, self.Y_test = dataset_from_df(self.test,self.im_shape, 'angular')
+            
+            print('Trainset Dimensions: {}'.format(self.X_train.shape))
+            print('validset Dimensions: {}'.format(self.X_valid.shape))
+            print('Testset Dimensions: {}'.format(self.X_test.shape))
+
         print('dataset loaded!')
         return True
 
@@ -102,22 +113,38 @@ class RobocarTrainer(object):
         print('hiperparameters:')
         print('batch size:{}'.format(self.batch_size))
         
-
-        print('training...')
-        self.model.fit_generator(
-                            generator_from_df(self.train, self.batch_size, self.im_shape, 'angular'),
-                            steps_per_epoch=self.train_steps, 
+        if self.use_generator:
+            print('training...')
+            self.model.fit_generator(
+                                generator_from_df(self.train, self.batch_size, self.im_shape, 'angular'),
+                                steps_per_epoch=self.train_steps, 
+                                epochs=self.n_epochs,
+                                validation_data=generator_from_df(self.valid, self.batch_size, self.im_shape, 'angular'),
+                                validation_steps=self.valid_steps,
+                                callbacks=[self.tfBoardCB, self.checkpointCB],
+                                verbose=2
+                                )
+            print('finished training')
+            self.score = self.model.evaluate_generator(
+                                generator_from_df(self.test, self.batch_size, self.im_shape, 'angular'), 
+                                steps=self.test_steps
+                                )
+        else:
+            # load dataset on memory
+            print('training begins')
+            self.model.fit(self.X_train, self.Y_train,
+                            batch_size=self.batch_size,
                             epochs=self.n_epochs,
-                            validation_data=generator_from_df(self.valid, self.batch_size, self.im_shape, 'angular'),
-                            validation_steps=self.valid_steps,
+                            validation_data=(self.X_valid, self.Y_valid),
                             callbacks=[self.tfBoardCB, self.checkpointCB],
                             verbose=2
                             )
-        print('finished training')
-        self.score = self.model.evaluate_generator(
-                            generator_from_df(self.test, self.batch_size, self.im_shape, 'angular'), 
-                            steps=self.test_steps
-                            )
+            print('finished training')
+            self.score = self.model.evaluate_generator(
+                                self.X_test, self.Y_test, 
+                                batch_size=self.batch_size,
+                                )
+            # pass
         print('loss: ', self.score)
 
     def SaveModel(self):

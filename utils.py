@@ -87,6 +87,17 @@ def file_path_from_db_id(db_id, pattern="%d.bmp", top="dataset/"):
     s = '%09d' % db_id
     return os.path.join(top, pattern % db_id)
 
+def dataset_from_df(df, target_size, target_column='target', features=None, process=True):
+    print('loading images')
+    if process == True:
+        X = np.array([(2 * (img_to_array(load_img(f, target_size=target_size)) / 255.0 - 0.5)) for f in df.imgpath])
+    else:
+        X = np.array([((img_to_array(load_img(f, target_size=target_size)))) for f in df.imgpath])
+                    
+    Y = df[target_column].values
+
+    return X, Y
+
 
 def generator_from_df(df, batch_size, target_size, target_column='target', features=None, process=True):
     print('generating minibatch!')
