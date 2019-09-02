@@ -59,7 +59,7 @@ class RobocarTrainer(object):
         self.use_generator = use_generator
         # creating callbacks
         self.tfBoardCB = TensorBoard('{}/{}_{}'.format(self.log_path, model_name, time()), write_graph=True)
-        filepath= os.path.join(model_path, model_name + '_best.h5')
+        filepath= os.path.join(self.model_path, self.model_name + '_best.h5')
         self.checkpointCB = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
         # load model
         print('loading model...')
@@ -152,7 +152,7 @@ class RobocarTrainer(object):
 
     def SaveModel(self):
         # serialize model to JSON
-        filepath= os.path.join(model_path, model_name + '.h5')
+        filepath= os.path.join(self.model_path, self.model_name + '.h5')
         self.model.save_weights(filepath)
         print("Saved model to disk")
 
