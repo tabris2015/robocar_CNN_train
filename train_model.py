@@ -100,7 +100,7 @@ class RobocarTrainer(object):
         print('dataset loaded!')
         return True
 
-    def Train(self):
+    def Train(self, use_tpu=False):
         model_json = self.model.to_json()
         with open(os.path.join(self.model_path, self.model_name + '.json'), "w") as json_file:
             json_file.write(model_json)
@@ -113,8 +113,15 @@ class RobocarTrainer(object):
         
         print('hiperparameters:')
         print('batch size:{}'.format(self.batch_size))
-        
         start_time = time()
+        if use_tpu:
+            print('converting model for tpu')
+            TPU_WORKER = 'grpc://' + os.environ['COLAB_TPU_ADDR']
+            tf.logging.set_verbosity(tf.logging.INFO)
+            self.model = tf.contrib.tpu.keras_to_tpu_model(
+                                    self.model,strategy=tf.contrib.tpu.TPUDistributionStrategy(
+                                            tf.contrib.cluster_resolver.TPUClusterResolver(TPU_WORKER)))
+        
         if self.use_generator:
             print('training...')
             self.model.fit_generator(
