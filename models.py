@@ -1,18 +1,18 @@
 import tensorflow as tf
-import tensorflow.keras as keras
-from keras.models import model_from_json
+from tensorflow.python import keras
+from tensorflow.python.keras.models import model_from_json
 import numpy as np
 import tensorflow as tf
-from keras.models import Sequential
-from keras.models import Model
-from keras.layers import Input, Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
-from keras.layers import Activation
-from keras.layers import ELU, Lambda, merge, GlobalAveragePooling2D
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Input, Dense, Dropout, Flatten
+from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from tensorflow.python.keras.layers import Activation
+from tensorflow.python.keras.layers import ELU, Lambda, merge, GlobalAveragePooling2D
 
-from keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam
 
-from keras import backend as K
+from tensorflow.python.keras import backend as K
 
 def base(input_shape):
     model = Sequential()

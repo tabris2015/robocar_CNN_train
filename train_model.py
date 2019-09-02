@@ -1,9 +1,10 @@
 import tensorflow as tf
-import tensorflow.keras as keras
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
+from tensorflow.python import keras
 
-from keras.models import model_from_json
+from tensorflow.python.keras.preprocessing.image import load_img
+from tensorflow.python.keras.preprocessing.image import img_to_array
+
+from tensorflow.python.keras.models import model_from_json
 
 import numpy as np
 import pandas as pd
@@ -18,13 +19,13 @@ import shutil
 
 from sklearn.model_selection import train_test_split
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dense, Dropout, Flatten
+from tensorflow.python.keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-from keras.callbacks import TensorBoard, ModelCheckpoint
+from tensorflow.python.keras.callbacks import TensorBoard, ModelCheckpoint
 
-from keras.utils import plot_model
+from tensorflow.python.keras.utils import plot_model
 import models
 from utils import *
 

@@ -1,9 +1,9 @@
 import tensorflow as tf
-import tensorflow.keras as keras
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
+from tensorflow.python import keras
+from tensorflow.python.keras.preprocessing.image import load_img
+from tensorflow.python.keras.preprocessing.image import img_to_array
 
-from keras.models import model_from_json
+from tensorflow.python.keras.models import model_from_json
 
 import numpy as np
 import pandas as pd
