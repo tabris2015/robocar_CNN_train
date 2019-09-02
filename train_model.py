@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, Flatten
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D
-from keras import backend as K
+from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.callbacks import TensorBoard, ModelCheckpoint
 
 from tensorflow.python.keras.utils import plot_model
